@@ -7,7 +7,6 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableR2dbcRepositories
 public class OrderServiceApplication {
 
 	public static void main(String[] args) {
