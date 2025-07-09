@@ -1,0 +1,36 @@
+# azure-pipelines.yml
+# Pipeline para el microservicio: order-service
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  SERVICE_NAME: 'order-service'
+  AWS_REGION: 'us-east-1'
+  ECR_REPOSITORY_NAME: 'arka-ecommerce-microservices/$(SERVICE_NAME)'
+  IMAGE_TAG: '$(Build.BuildId)'
+
+steps:
+- task: Maven@4
+  displayName: 'Compilar y empaquetar Order Service'
+  inputs:
+    mavenPomFile: '$(SERVICE_NAME)/pom.xml'
+    goals: 'clean package -DskipTests'
+    publishJUnitResults: false
+    testResultsFiles: '**/TEST-*.xml'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.7'
+
+- task: Docker@2
+  displayName: 'Construir y empujar imagen Docker de Order Service a ECR'
+  inputs:
+    containerRegistry: 'aws-ecr-connection'
+    repository: '$(ECR_REPOSITORY_NAME)'
+    command: 'buildAndPush'
+    Dockerfile: '$(SERVICE_NAME)/Dockerfile'
+    tags: |
+      $(IMAGE_TAG)
+      latest
